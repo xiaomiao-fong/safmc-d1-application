@@ -39,19 +39,20 @@ class Agent(Node):
         self.heading = 0.0
 
         self.espcmd : ESPCMD = ESPCMD()
-        self.esp_vel_sub : rclpy.publisher.Publisher = self.create_subscription(ESPCMD, "/esp_vel", self.esp_cmd_callback ,qos_profile)
         # Subscriptions
-        print(f"/px4_{self.drone_id}/fmu/out/vehicle_local_position")
+        print(f"/fmu/out/vehicle_local_position")
+
+        self.esp_vel_sub : rclpy.publisher.Publisher = self.create_subscription(ESPCMD, "/esp_vel", self.esp_cmd_callback ,qos_profile)
         
         self.vehicle_local_position_sub = self.create_subscription(
             VehicleLocalPosition,
-            f"/px4_{self.drone_id}/fmu/out/vehicle_local_position",
+            f"/fmu/out/vehicle_local_position",
             self.__set_vehicle_local_position,
             qos_profile)
 
         self.vehicle_status_sub = self.create_subscription(
             VehicleStatus,
-            f"/px4_{self.drone_id}/fmu/out/vehicle_status",
+            f"/fmu/out/vehicle_status",
             self.__set_vehicle_status,
             qos_profile
         )
@@ -59,19 +60,19 @@ class Agent(Node):
         # Publishers
         self.vehicle_command_pub = self.create_publisher(
             VehicleCommand,
-            f"/px4_{self.drone_id}/fmu/in/vehicle_command",
+            f"/fmu/in/vehicle_command",
             qos_profile
         )
 
         self.offboard_control_mode_pub = self.create_publisher(
             OffboardControlMode,
-            f"/px4_{self.drone_id}/fmu/in/offboard_control_mode",
+            f"/fmu/in/offboard_control_mode",
             qos_profile
         )
 
         self.trajectory_setpoint_pub = self.create_publisher(
             TrajectorySetpoint,
-            f"/px4_{self.drone_id}/fmu/in/trajectory_setpoint",
+            f"/fmu/in/trajectory_setpoint",
             qos_profile
         )
 
