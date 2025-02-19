@@ -106,14 +106,14 @@ class Agent(Node):
         trajectory_setpoint_msg = TrajectorySetpoint()
         trajectory_setpoint_msg.timestamp = self.vehicle_timestamp
 
-        trajectory_setpoint_msg.velocity[0] = self.espcmd.vx
+        trajectory_setpoint_msg.velocity[0] = 0.0
         trajectory_setpoint_msg.velocity[1] = self.espcmd.vy
         trajectory_setpoint_msg.velocity[2] = self.espcmd.vz
-        trajectory_setpoint_msg.yawspeed = self.espcmd.yaw
+        trajectory_setpoint_msg.yawspeed = 0.0
 
-        trajectory_setpoint_msg.position[0] = None
-        trajectory_setpoint_msg.position[1] = None
-        trajectory_setpoint_msg.position[2] = None
+        trajectory_setpoint_msg.position[0] = 0.0
+        trajectory_setpoint_msg.position[1] = 0.0
+        trajectory_setpoint_msg.position[2] = 0.0
         trajectory_setpoint_msg.yaw = self.heading
 
         self.trajectory_setpoint_pub.publish(trajectory_setpoint_msg)
@@ -199,7 +199,7 @@ class Agent(Node):
         """
         offboard_control_mode_msg = OffboardControlMode()
         offboard_control_mode_msg.timestamp = self.vehicle_timestamp
-        offboard_control_mode_msg.velocity = True  # TrajectorySetpoint
+        offboard_control_mode_msg.position = True  # TrajectorySetpoint
         self.offboard_control_mode_pub.publish(offboard_control_mode_msg)
 
     def activate_offboard_control_mode(self) -> None:
