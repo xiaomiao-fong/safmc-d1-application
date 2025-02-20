@@ -90,30 +90,33 @@ class Agent(Node):
                 self.get_logger().info(f"Vehicle timestamp: {self.vehicle_timestamp}")
                 self.get_logger().info(f"Preflight checks passed: {self.is_each_pre_flight_check_passed}")
 
-                if (not self.is_armed) and self.is_each_pre_flight_check_passed:
+                if self.is_each_pre_flight_check_passed:
                     self.get_logger().info("Drone is ready to arm and start offboard control.")
                     self.activate_offboard_control_mode()
-                    self.arm()
+                    #self.arm()
+                    #self.perform_takeoff()
                     self.get_logger().info("Ok")
+                    # if(self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD) : self.state = "TELEOP"
                     self.state = "TELEOP"
                     
 
             case "TELEOP":
                 self.move_with_velocity()
+                pass
 
     
     def move_with_velocity(self):
         trajectory_setpoint_msg = TrajectorySetpoint()
         trajectory_setpoint_msg.timestamp = self.vehicle_timestamp
 
-        trajectory_setpoint_msg.velocity[0] = 0.0
-        trajectory_setpoint_msg.velocity[1] = self.espcmd.vy
-        trajectory_setpoint_msg.velocity[2] = self.espcmd.vz
+        trajectory_setpoint_msg.velocity[0] = 0.05
+        trajectory_setpoint_msg.velocity[1] = 0.0
+        trajectory_setpoint_msg.velocity[2] = 0.0
         trajectory_setpoint_msg.yawspeed = 0.0
 
-        trajectory_setpoint_msg.position[0] = 0.0
-        trajectory_setpoint_msg.position[1] = 0.0
-        trajectory_setpoint_msg.position[2] = 0.0
+        trajectory_setpoint_msg.position[0] = None
+        trajectory_setpoint_msg.position[1] = None
+        trajectory_setpoint_msg.position[2] = None
         trajectory_setpoint_msg.yaw = self.heading
 
         self.trajectory_setpoint_pub.publish(trajectory_setpoint_msg)
@@ -121,6 +124,7 @@ class Agent(Node):
     def __set_vehicle_status(self, vehicle_status_msg: VehicleStatus) -> None:
         self.is_each_pre_flight_check_passed = vehicle_status_msg.pre_flight_checks_pass
         self.vehicle_timestamp = vehicle_status_msg.timestamp
+        self.nav_state = vehicle_status_msg.nav_state
         self.is_armed = (
             vehicle_status_msg.arming_state == VehicleStatus.ARMING_STATE_ARMED
         )        
@@ -199,7 +203,7 @@ class Agent(Node):
         """
         offboard_control_mode_msg = OffboardControlMode()
         offboard_control_mode_msg.timestamp = self.vehicle_timestamp
-        offboard_control_mode_msg.position = True  # TrajectorySetpoint
+        offboard_control_mode_msg.velocity = True  # TrajectorySetpoint
         self.offboard_control_mode_pub.publish(offboard_control_mode_msg)
 
     def activate_offboard_control_mode(self) -> None:
@@ -216,6 +220,16 @@ class Agent(Node):
             6
         )
 
+        self.vehicle_command_pub.publish(vehicle_command_msg)
+
+    def perform_takeoff(self) -> None:
+
+        vehicle_command_msg = self.__get_default_vehicle_command_msg(
+            VehicleCommand.VEHICLE_CMD_DO_SET_MODE,
+            1,
+            4,
+            2
+        )
         self.vehicle_command_pub.publish(vehicle_command_msg)
 
 def main(args = None):
