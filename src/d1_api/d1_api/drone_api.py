@@ -9,9 +9,9 @@ from rclpy.node import Node
 from rclpy.qos import (QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile,
                        QoSReliabilityPolicy)
 
-from esp_agent.esp_agent.constant import TAKEOFF_HEIGHT
+from esp_agent.constant import TAKEOFF_HEIGHT
 from esp_msg.msg import ESPCMD
-from utils.utils.coordinate import Coordinate
+from utils.coordinate import Coordinate
 from px4_msgs.msg import (GotoSetpoint, OffboardControlMode,
                           TrajectorySetpoint, VehicleCommand,
                           VehicleLocalPosition, VehicleStatus)
