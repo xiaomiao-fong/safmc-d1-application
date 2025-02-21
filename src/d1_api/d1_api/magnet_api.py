@@ -3,8 +3,6 @@ from rclpy.qos import (QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile,
                        QoSReliabilityPolicy)
 from std_msgs.msg import Bool
 
-from agent_msgs.msg import Magnet, Payload
-
 from .api import Api
 
 

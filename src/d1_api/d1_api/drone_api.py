@@ -22,6 +22,7 @@ from .api import Api
 class DroneApi(Api):
     def __init__(self, node: Node, drone_id: int):
 
+        self.node = node
         self.drone_id = drone_id
 
         self.state = "INIT"
@@ -203,6 +204,20 @@ class DroneApi(Api):
         )
 
         self.vehicle_command_pub.publish(vehicle_command_msg)
+        
+    def disarm(self) -> None:
+        """
+        Disarms the drone, preventing flight.
+
+        Sends a command to the vehicle to disarm it, ensuring it cannot take off.
+        This command uses `VEHICLE_CMD_COMPONENT_ARM_DISARM` with `param1=0` to disarm the vehicle.
+        """
+        vehicle_command_msg = self.__get_default_vehicle_command_msg(
+            VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM,
+            0
+        )
+
+        self.__vehicle_command_pub.publish(vehicle_command_msg)
 
     def set_offboard_control_mode(self) -> None:
         """
