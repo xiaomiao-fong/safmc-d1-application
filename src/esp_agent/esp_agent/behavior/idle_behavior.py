@@ -1,6 +1,8 @@
 from typing import Optional
 
 from .behavior import Behavior
+from d1_api import (DroneApi, MediatorApi, MagnetApi, ArucoApi)
+from utils.logger import Logger
 
 
 class IdleBehavior(Behavior):
@@ -9,8 +11,8 @@ class IdleBehavior(Behavior):
         self.drone_api = drone_api
         self.mediator_api = mediator_api
 
-    def on_enter(self):
-        self.mediator_api.reset_states()
+    # def on_enter(self):
+    #     self.mediator_api.reset_states()
 
     def execute(self):
         if self.drone_api.is_armed:

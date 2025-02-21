@@ -1,7 +1,10 @@
 from transitions import Machine
 from enum import Enum
 
-from esp_agent.behavior import (IdleBehavior)
+from d1_api import (DroneApi, MagnetApi, MediatorApi, ArucoApi)
+from utils.logger import Logger
+
+from esp_agent.behavior import (Behavior, IdleBehavior)
 
 class States(Enum):
     IDLE = 0
@@ -71,3 +74,21 @@ class AgentMachine(Machine):
 
         super().__init__(self, states=states,
                          transitions=populate_triggers(transitions), initial=States.IDLE)
+        
+    def execute(self):
+        """
+        Executes the behavior of the current state.
+        """
+        self.logger.info(self.state.name)
+        behavior: Behavior = self.state_behavior_map.get(self.state)
+        if behavior:
+            behavior.execute()
+
+    def proceed(self):
+        """
+        Checks conditions and triggers state transitions.
+        """
+        behavior: Behavior = self.state_behavior_map.get(self.state)
+        if behavior:
+            if (next_state := behavior.get_next_state()):
+                self.trigger(next_state)

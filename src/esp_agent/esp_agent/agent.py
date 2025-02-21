@@ -1,7 +1,13 @@
 import rclpy
 from rclpy.node import Node
+from utils.utils.coordinate import Coordinate
+from utils.utils.logger import Logger
+from utils.utils.parameters import get_parameter
 
+from d1_api import (DroneApi, MediatorApi, MagnetApi, ArucoApi)
 
+from constant import DELTA_TIME
+from esp_agent.agent_machine import AgentMachine
 
 class Agent(Node):
     def __init__(self):
@@ -16,12 +22,11 @@ class Agent(Node):
         self.drone_api = DroneApi(self, drone_id)
         self.mediator_api = MediatorApi(self, drone_id)
         self.magnet_api = MagnetApi(self, drone_id)
-        self.lidar_api = LidarApi(self, drone_id)
         self.aruco_api = ArucoApi(self)
 
         # State Machine
         self.machine = AgentMachine(
-            self.logger, self.drone_api, self.magnet_api, self.mediator_api, self.lidar_api, self.aruco_api)
+            self.logger, self.drone_api, self.magnet_api, self.mediator_api, self.aruco_api)
 
         self.timer = self.create_timer(DELTA_TIME, self.update)
 

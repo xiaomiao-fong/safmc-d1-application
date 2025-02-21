@@ -1,28 +1,30 @@
-import rclpy
+# TODO 使用 VehicleCommandAck 來追蹤是否設定成功 (error log)
+# TODO 大部分 sub 好像不用特別用 _sub 來儲存...
+
+from typing import Optional
+
+from geometry_msgs.msg import Point
+from rclpy.clock import Clock
 from rclpy.node import Node
 from rclpy.qos import (QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile,
                        QoSReliabilityPolicy)
 
-import serial
-import threading
-import json
-import time
-
-from .NEDCoordinate import NEDCoordinate
+from esp_agent.esp_agent.constant import TAKEOFF_HEIGHT
 from esp_msg.msg import ESPCMD
+from utils.utils.coordinate import Coordinate
 from px4_msgs.msg import (GotoSetpoint, OffboardControlMode,
                           TrajectorySetpoint, VehicleCommand,
                           VehicleLocalPosition, VehicleStatus)
 
-TAKEOFF_HEIGHT = 0.5
+from .api import Api
 
-class Agent(Node):
 
-    def __init__(self):
-        super().__init__("Agent")
-        self.get_logger().info("Starting task...")
+class DroneApi(Api):
+    def __init__(self, node: Node, drone_id: int):
+
+        self.drone_id = drone_id
+
         self.state = "INIT"
-        self.drone_id = 1
 
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -35,15 +37,15 @@ class Agent(Node):
         self.is_armed = False
         self.vehicle_timestamp = 1
         self.is_each_pre_flight_check_passed = False
-        self.start_position = NEDCoordinate(0, 0, 0)
-        self.local_position = NEDCoordinate(0, 0, 0)
+        self.start_position = Coordinate(0, 0, 0)
+        self.local_position = Coordinate(0, 0, 0)
         self.heading = 0.0
 
         self.espcmd : ESPCMD = ESPCMD()
         # Subscriptions
         print(f"/fmu/out/vehicle_local_position")
 
-        self.esp_vel_sub : rclpy.publisher.Publisher = self.create_subscription(ESPCMD, "/esp_vel", self.esp_cmd_callback ,qos_profile)
+        self.esp_vel_sub = self.create_subscription(ESPCMD, "/esp_vel", self.esp_cmd_callback ,qos_profile)
         
         self.vehicle_local_position_sub = self.create_subscription(
             VehicleLocalPosition,
@@ -95,7 +97,7 @@ class Agent(Node):
                     self.get_logger().info("Drone is ready to arm and start offboard control.")
                     self.activate_offboard_control_mode()
                     self.arm()
-                    self.perform_takeoff()
+                    #self.perform_takeoff()
                     self.get_logger().info("Ok")
                     # if(self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD) : self.state = "TELEOP"
                     self.state = "TELEOP"
@@ -110,7 +112,7 @@ class Agent(Node):
                 pass
     
     def set_start_position(self):
-        self.start_position = NEDCoordinate(
+        self.start_position = Coordinate(
             self.local_position.x,
             self.local_position.y,
             self.local_position.z - TAKEOFF_HEIGHT
@@ -120,14 +122,14 @@ class Agent(Node):
         trajectory_setpoint_msg = TrajectorySetpoint()
         trajectory_setpoint_msg.timestamp = self.vehicle_timestamp
 
-        trajectory_setpoint_msg.velocity[0] = 0.05
+        trajectory_setpoint_msg.velocity[0] = 0.8
         trajectory_setpoint_msg.velocity[1] = 0.0
-        trajectory_setpoint_msg.velocity[2] = 0.0
+        trajectory_setpoint_msg.velocity[2] = -0.3
         trajectory_setpoint_msg.yawspeed = 0.0
 
-        trajectory_setpoint_msg.position[0] = self.local_position.x
-        trajectory_setpoint_msg.position[1] = self.local_position.y
-        trajectory_setpoint_msg.position[2] = self.local_position.z
+        trajectory_setpoint_msg.position[0] = None
+        trajectory_setpoint_msg.position[1] = None
+        trajectory_setpoint_msg.position[2] = None
         trajectory_setpoint_msg.yaw = self.heading
 
         self.trajectory_setpoint_pub.publish(trajectory_setpoint_msg)
@@ -142,7 +144,7 @@ class Agent(Node):
 
     def __set_vehicle_local_position(self, vehicle_local_position_msg: VehicleLocalPosition):
         self.heading = vehicle_local_position_msg.heading
-        self.local_position = NEDCoordinate(
+        self.local_position = Coordinate(
             x=vehicle_local_position_msg.x,
             y=vehicle_local_position_msg.y,
             z=vehicle_local_position_msg.z
@@ -214,7 +216,7 @@ class Agent(Node):
         """
         offboard_control_mode_msg = OffboardControlMode()
         offboard_control_mode_msg.timestamp = self.vehicle_timestamp
-        offboard_control_mode_msg.position = True  # TrajectorySetpoint
+        offboard_control_mode_msg.velocity = True  # TrajectorySetpoint
         self.offboard_control_mode_pub.publish(offboard_control_mode_msg)
 
     def activate_offboard_control_mode(self) -> None:
@@ -242,12 +244,3 @@ class Agent(Node):
             2
         )
         self.vehicle_command_pub.publish(vehicle_command_msg)
-
-def main(args = None):
-    rclpy.init(args=args)
-    node = Agent()
-    rclpy.spin(node)
-    rclpy.shutdown()
-
-if __name__ == "__main__":
-    main()
