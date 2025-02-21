@@ -18,6 +18,7 @@ class MediatorApi(Api):
         self.topic_prefix = f"/drone_{self.drone_id}"
         
         self.__arming_signal : bool = False
+        self.__teleop_signal : bool = False
 
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -29,6 +30,7 @@ class MediatorApi(Api):
         # Subscribers
 
         self.node.create_subscription(Bool, f"{self.topic_prefix}/in/arm", self.__set_arming_signal, qos_profile)
+        self.node.create_subscription(Bool, f"{self.topic_prefix}/in/teleop", self.__set_teleop_signal, qos_profile)
 
         #Publishers
 
@@ -40,11 +42,18 @@ class MediatorApi(Api):
     @property
     def received_arming_signal(self) -> bool:
         return self.__arming_signal
+    
+    @property
+    def received_teleop_signal(self) -> bool:
+        return self.__teleop_signal
         
     # Setters
 
     def __set_arming_signal(self, msg : Bool) -> None:
         self.__arming_signal = msg.data
+
+    def __set_teleop_signal(self, msg : Bool) -> None:
+        self.__teleop_signal = msg.data
 
     # API for Mediator
 
