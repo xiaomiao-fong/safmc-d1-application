@@ -4,14 +4,14 @@ from enum import Enum
 from d1_api import (DroneApi, MagnetApi, MediatorApi, ArucoApi)
 from utils.logger import Logger
 
-from esp_agent.behavior import (Behavior, IdleBehavior, ArmBehavior)
+from esp_agent.behavior import (Behavior, IdleBehavior, ArmBehavior, HoldBehavior, LoadBehavior)
 
 class States(Enum):
     IDLE = 0
     ARM = 1
     TELEOP = 2
-    ALTITUDE = 3
-    WAIT_PICK = 4
+    HOLD = 3
+    LOAD = 4
     TRACK = 5
     DROP = 6
 
@@ -19,14 +19,14 @@ transitions = [
     {"source" : States.IDLE, "dest" : States.ARM},
     {"source" : States.ARM, "dest" : States.TELEOP},
     {"source" : States.TELEOP, "dest" : States.ARM},
-    {"source" : States.TELEOP, "dest" : States.ALTITUDE},
-    {"source" : States.TELEOP, "dest" : States.WAIT_PICK},
+    {"source" : States.TELEOP, "dest" : States.HOLD},
+    {"source" : States.TELEOP, "dest" : States.LOAD},
     {"source" : States.TELEOP, "dest" : States.DROP},
-    {"source" : States.ALTITUDE, "dest" : States.ARM},
-    {"source" : States.ALTITUDE, "dest" : States.TELEOP},
-    {"source" : States.ALTITUDE, "dest" : States.TRACK},
-    {"source" : States.WAIT_PICK, "dest" : States.ARM},
-    {"source" : States.WAIT_PICK, "dest" : States.TELEOP},
+    {"source" : States.HOLD, "dest" : States.TELEOP},
+    {"source" : States.HOLD, "dest" : States.DROP},
+    {"source" : States.HOLD, "dest" : States.TRACK},
+    {"source" : States.LOAD, "dest" : States.ARM},
+    {"source" : States.LOAD, "dest" : States.TELEOP},
     {"source" : States.TRACK, "dest" : States.ARM},
     {"source" : States.TRACK, "dest" : States.DROP},
     {"source" : States.DROP, "dest" : States.ARM}
@@ -45,7 +45,9 @@ class AgentMachine(Machine):
         # behavior binding
         self.state_behavior_map = {
             States.IDLE: IdleBehavior(logger, drone_api, mediator_api),
-            States.ARM: ArmBehavior(logger, drone_api, mediator_api)
+            States.ARM: ArmBehavior(logger, drone_api, mediator_api),
+            States.HOLD: ArmBehavior(logger, drone_api, mediator_api),
+            States.LOAD: ArmBehavior(logger, drone_api, mediator_api, magnet_api)
         }
 
         # add state on_enter/on_exit callback
