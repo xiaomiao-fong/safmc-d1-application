@@ -22,6 +22,7 @@ from .api import Api
 class DroneApi(Api):
     def __init__(self, node: Node, drone_id: int):
 
+        self.node = node
         self.drone_id = drone_id
 
         self.state = "INIT"
@@ -45,15 +46,15 @@ class DroneApi(Api):
         # Subscriptions
         print(f"/fmu/out/vehicle_local_position")
 
-        self.esp_vel_sub = self.create_subscription(ESPCMD, "/esp_vel", self.esp_cmd_callback ,qos_profile)
+        self.esp_vel_sub = self.node.create_subscription(ESPCMD, "/esp_vel", self.esp_cmd_callback ,qos_profile)
         
-        self.vehicle_local_position_sub = self.create_subscription(
+        self.vehicle_local_position_sub = self.node.create_subscription(
             VehicleLocalPosition,
             f"/fmu/out/vehicle_local_position",
             self.__set_vehicle_local_position,
             qos_profile)
 
-        self.vehicle_status_sub = self.create_subscription(
+        self.vehicle_status_sub = self.node.create_subscription(
             VehicleStatus,
             f"/fmu/out/vehicle_status",
             self.__set_vehicle_status,
@@ -61,55 +62,26 @@ class DroneApi(Api):
         )
 
         # Publishers
-        self.vehicle_command_pub = self.create_publisher(
+        self.vehicle_command_pub = self.node.create_publisher(
             VehicleCommand,
             f"/fmu/in/vehicle_command",
             qos_profile
         )
 
-        self.offboard_control_mode_pub = self.create_publisher(
+        self.offboard_control_mode_pub = self.node.create_publisher(
             OffboardControlMode,
             f"/fmu/in/offboard_control_mode",
             qos_profile
         )
 
-        self.trajectory_setpoint_pub = self.create_publisher(
+        self.trajectory_setpoint_pub = self.node.create_publisher(
             TrajectorySetpoint,
             f"/fmu/in/trajectory_setpoint",
             qos_profile
         )
-
-        self.create_timer(0.01, self.execute_state)
-        self.create_timer(0.01, self.set_offboard_control_mode)
         
     def esp_cmd_callback(self, msg : ESPCMD):
         self.espcmd = msg
-
-    def execute_state(self):
-        match self.state:
-            case "INIT":
-
-                self.get_logger().info(f"Armed status: {self.is_armed}")
-                self.get_logger().info(f"Vehicle timestamp: {self.vehicle_timestamp}")
-                self.get_logger().info(f"Preflight checks passed: {self.is_each_pre_flight_check_passed}")
-
-                if self.is_each_pre_flight_check_passed:
-                    self.get_logger().info("Drone is ready to arm and start offboard control.")
-                    self.activate_offboard_control_mode()
-                    self.arm()
-                    #self.perform_takeoff()
-                    self.get_logger().info("Ok")
-                    # if(self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD) : self.state = "TELEOP"
-                    self.state = "TELEOP"
-                    
-
-            case "TELEOP":
-                print(self.start_position.z - self.local_position.z)
-                if self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD:
-                    self.move_with_velocity()
-                elif abs(abs(self.local_position.z - self.start_position.z)- TAKEOFF_HEIGHT) < 0.06:
-                    self.activate_offboard_control_mode()
-                pass
     
     def set_start_position(self):
         self.start_position = Coordinate(
@@ -200,6 +172,20 @@ class DroneApi(Api):
         vehicle_command_msg = self.__get_default_vehicle_command_msg(
             VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM,
             1
+        )
+
+        self.vehicle_command_pub.publish(vehicle_command_msg)
+
+    def disarm(self) -> None:
+        """
+        Disarms the drone, preventing flight.
+
+        Sends a command to the vehicle to disarm it, ensuring it cannot take off.
+        This command uses `VEHICLE_CMD_COMPONENT_ARM_DISARM` with `param1=0` to disarm the vehicle.
+        """
+        vehicle_command_msg = self.__get_default_vehicle_command_msg(
+            VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM,
+            0
         )
 
         self.vehicle_command_pub.publish(vehicle_command_msg)
