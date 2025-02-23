@@ -39,6 +39,7 @@ class MediatorApi(Api):
 
         # Subscriptions
         node.create_subscription(State, "/agent/state", self.__set_status, qos_profile)
+        node.create_subscription(Bool, f"/agent_{self.__drone_id}/cmd_arm", self.__set_is_ok_to_arm, qos_profile)
 
         # Publishers
 
@@ -51,9 +52,15 @@ class MediatorApi(Api):
     @property
     def control_state(self):
         return self.__control_state
+    @property
+    def is_ok_to_arm(self):
+        return self.__is_ok_to_arm
 
     
     def __set_status(self, msg: State):
         self.__takeoff_state = msg.takeoff_state
         self.__agent_state = msg.agent_state
         self.__control_state = msg.control_state
+
+    def __set_is_ok_to_arm(self, msg: Bool):
+        self.__is_ok_to_arm = msg.data
