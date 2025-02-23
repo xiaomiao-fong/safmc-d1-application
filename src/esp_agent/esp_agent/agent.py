@@ -1,12 +1,12 @@
 import rclpy
 from rclpy.node import Node
-from utils.utils.coordinate import Coordinate
-from utils.utils.logger import Logger
-from utils.utils.parameters import get_parameter
+from utils.coordinate import Coordinate
+from utils.logger import Logger
+from utils.parameters import get_parameter
 
 from d1_api import (DroneApi, MediatorApi, MagnetApi, ArucoApi)
 
-from constant import DELTA_TIME
+from .constant import DELTA_TIME
 from esp_agent.agent_machine import AgentMachine
 
 class Agent(Node):
@@ -35,7 +35,7 @@ class Agent(Node):
         self.drone_api.set_offboard_control_mode()
 
         # 傳送 agent status 給 mediator
-        self.mediator_api.send_status(self.machine.state.value, self.drone_api.local_position)
+        # self.mediator_api.send_status(self.machine.state.value, self.drone_api.local_position)
 
         self.machine.proceed()
         self.machine.execute()
