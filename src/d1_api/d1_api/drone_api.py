@@ -90,13 +90,13 @@ class DroneApi(Api):
             self.local_position.z - TAKEOFF_HEIGHT
         )
     
-    def move_with_velocity(self):
+    def move_with_velocity(self, velocity : Coordinate):
         trajectory_setpoint_msg = TrajectorySetpoint()
         trajectory_setpoint_msg.timestamp = self.vehicle_timestamp
 
-        trajectory_setpoint_msg.velocity[0] = 0.8
-        trajectory_setpoint_msg.velocity[1] = 0.0
-        trajectory_setpoint_msg.velocity[2] = -0.3
+        trajectory_setpoint_msg.velocity[0] = velocity.x
+        trajectory_setpoint_msg.velocity[1] = velocity.y
+        trajectory_setpoint_msg.velocity[2] = velocity.z
         trajectory_setpoint_msg.yawspeed = 0.0
 
         trajectory_setpoint_msg.position[0] = None

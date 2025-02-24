@@ -4,7 +4,7 @@ from enum import Enum
 from d1_api import (DroneApi, MagnetApi, MediatorApi, ArucoApi)
 from utils.logger import Logger
 
-from esp_agent.behavior import (Behavior, IdleBehavior, ArmBehavior, HoldBehavior, LoadBehavior)
+from esp_agent.behavior import (Behavior, IdleBehavior, ArmBehavior, HoldBehavior, LoadBehavior, TeleopBehavior)
 
 class States(Enum):
     IDLE = 0
@@ -46,8 +46,9 @@ class AgentMachine(Machine):
         self.state_behavior_map = {
             States.IDLE: IdleBehavior(logger, drone_api, mediator_api),
             States.ARM: ArmBehavior(logger, drone_api, mediator_api),
-            States.HOLD: ArmBehavior(logger, drone_api, mediator_api),
-            States.LOAD: ArmBehavior(logger, drone_api, mediator_api, magnet_api)
+            States.TELEOP: TeleopBehavior(logger, drone_api, mediator_api),
+            States.HOLD: HoldBehavior(logger, drone_api, mediator_api),
+            States.LOAD: LoadBehavior(logger, drone_api, mediator_api, magnet_api)
         }
 
         # add state on_enter/on_exit callback
