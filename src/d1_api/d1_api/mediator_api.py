@@ -30,16 +30,16 @@ class MediatorApi(Api):
 
         # Subscribers
 
-        node.create_subscription(Bool, f"{self.__topic_prefix}/in/arm", self.__set_arming_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/in/teleop", self.__set_teleop_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/arm", self.__set_arming_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/teleop", self.__set_teleop_signal, qos_profile)
 
         # TODO mediator outgoing msg
-        node.create_subscription(Bool, f"{self.__topic_prefix}/in/drop", self.__set_drop_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/in/track", self.__set_track_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/drop", self.__set_drop_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/track", self.__set_track_signal, qos_profile)
 
         #Publishers
 
-        self.arm_ready_pub = node.create_publisher(Bool, f"{self.__topic_prefix}/out/arm_ready", qos_profile)
+        self.arm_ready_pub = node.create_publisher(UInt32, f"/mediator/arm_ready", qos_profile)
         self.status_pub = node.create_publisher(AgentStatus, '/mediator/status', qos_profile)
         self.loaded_pub = node.create_publisher(UInt32, '/mediator/loaded', qos_profile)
 
@@ -81,9 +81,7 @@ class MediatorApi(Api):
     ### API for Mediator ###
 
     def online(self) -> None:
-        online_msg = Bool()
-        online_msg.data = True
-        self.arm_ready_pub.publish(online_msg)
+        self.arm_ready_pub.publish(self.__get_drone_id_msg())
 
     def send_status(self, state_name: str, local_position: Coordinate):
         if state_name is None or local_position is None:
