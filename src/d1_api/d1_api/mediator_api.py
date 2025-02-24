@@ -20,6 +20,7 @@ class MediatorApi(Api):
         
         self.__arming_signal : bool = False
         self.__teleop_signal : bool = False
+        self.__load_signal : bool = False
 
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -32,6 +33,7 @@ class MediatorApi(Api):
 
         node.create_subscription(Bool, f"{self.__topic_prefix}/arm", self.__set_arming_signal, qos_profile)
         node.create_subscription(Bool, f"{self.__topic_prefix}/teleop", self.__set_teleop_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/load", self.__set_load_signal, qos_profile)
 
         # TODO mediator outgoing msg
         node.create_subscription(Bool, f"{self.__topic_prefix}/drop", self.__set_drop_signal, qos_profile)
@@ -53,6 +55,9 @@ class MediatorApi(Api):
     def received_teleop_signal(self) -> bool:
         return self.__teleop_signal
     @property
+    def received_load_signal(self) -> bool:
+        return self.__load_signal
+    @property
     def received_drop_signal(self) -> bool:
         return self.__drop_signal
     @property
@@ -66,6 +71,9 @@ class MediatorApi(Api):
 
     def __set_teleop_signal(self, msg : Bool) -> None:
         self.__teleop_signal = msg.data
+
+    def __set_load_signal(self, msg : Bool) -> None:
+        self.__load_signal = msg.data
 
     def __set_drop_signal(self, msg : Bool) -> None:
         self.__drop_signal = msg.data
