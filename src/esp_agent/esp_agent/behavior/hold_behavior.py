@@ -19,6 +19,8 @@ class HoldBehavior(Behavior):
         self.mediator_api.send_status()
         self.drone_api.move_to(self.target_position)
 
+        # TODO hold method
+
     def get_next_state(self) -> Optional[str]:
         if self.mediator_api.received_teleop_signal:
             return "teleop"

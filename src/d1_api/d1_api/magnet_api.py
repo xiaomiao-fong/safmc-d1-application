@@ -7,6 +7,8 @@ from agent_msgs.msg import Magnet, Payload
 
 from .api import Api
 
+# TODO gpio
+
 
 class MagnetApi(Api):
     def __init__(self, node: Node, drone_id : int):
