@@ -14,10 +14,16 @@ class LoadBehavior(Behavior):
         self.magnet_api = magnet_api
 
     def on_enter(self):
-        pass
+        self.target_position = self.drone_api.local_position
 
     def execute(self):
         self.mediator_api.send_status()
+
+        # TODO move simultaniously
+        # self.drone_api.move_to(self.target_position)
+
+        if self.magnet_api.is_loaded: 
+            self.magnet_api.deactivate_magnet()
 
     def get_next_state(self) -> Optional[str]:
         return "idle"
