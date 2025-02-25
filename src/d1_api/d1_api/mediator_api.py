@@ -21,6 +21,7 @@ class MediatorApi(Api):
         self.__arming_signal : bool = False
         self.__teleop_signal : bool = False
         self.__load_signal : bool = False
+        self.__drop_signal : bool = False
 
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,

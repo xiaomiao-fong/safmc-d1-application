@@ -22,7 +22,7 @@ class TeleopBehavior(Behavior):
             self.drone_api.espcmd.vx/2,
             self.drone_api.espcmd.vy/2,
             self.drone_api.espcmd.vz/2
-        ))
+        ), self.drone_api.espcmd.yaw)
 
 
     def get_next_state(self) -> Optional[str]:

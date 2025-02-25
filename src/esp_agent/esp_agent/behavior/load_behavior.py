@@ -18,10 +18,12 @@ class LoadBehavior(Behavior):
         self.drone_api.disarm()
 
     def execute(self):
+
+        # TODO load check
+
         self.mediator_api.send_status()
-        
-        if self.magnet_api.is_loaded: 
-            self.mediator_api.send_is_loaded()
+        self.magnet_api.activate_magnet()
+        self.mediator_api.send_is_loaded()
 
 
     def get_next_state(self) -> Optional[str]:

@@ -46,7 +46,7 @@ class DroneApi(Api):
         # Subscriptions
         print(f"/fmu/out/vehicle_local_position")
 
-        self.esp_vel_sub = self.node.create_subscription(ESPCMD, "/esp_vel", self.esp_cmd_callback ,qos_profile)
+        self.esp_vel_sub = self.node.create_subscription(ESPCMD, "/esp_values", self.esp_cmd_callback ,qos_profile)
         
         self.vehicle_local_position_sub = self.node.create_subscription(
             VehicleLocalPosition,
@@ -90,14 +90,14 @@ class DroneApi(Api):
             self.local_position.z - TAKEOFF_HEIGHT
         )
     
-    def move_with_velocity(self, velocity : Coordinate):
+    def move_with_velocity(self, velocity : Coordinate, yawRate : int):
         trajectory_setpoint_msg = TrajectorySetpoint()
         trajectory_setpoint_msg.timestamp = self.vehicle_timestamp
 
         trajectory_setpoint_msg.velocity[0] = velocity.x
         trajectory_setpoint_msg.velocity[1] = velocity.y
         trajectory_setpoint_msg.velocity[2] = velocity.z
-        trajectory_setpoint_msg.yawspeed = 0.0
+        trajectory_setpoint_msg.yawspeed = yawRate
 
         trajectory_setpoint_msg.position[0] = None
         trajectory_setpoint_msg.position[1] = None
