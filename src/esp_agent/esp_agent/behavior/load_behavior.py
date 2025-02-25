@@ -21,7 +21,7 @@ class LoadBehavior(Behavior):
 
         # TODO load check
 
-        self.mediator_api.send_status()
+        # self.mediator_api.send_status("load",self.drone_api.local_position)
         self.magnet_api.activate_magnet()
         self.mediator_api.send_is_loaded()
 
