@@ -14,6 +14,7 @@ class LoadBehavior(Behavior):
         self.magnet_api = magnet_api
 
     def on_enter(self):
+        self.mediator_api.set_load_signal(False)
         self.magnet_api.activate_magnet()
         self.drone_api.disarm()
 

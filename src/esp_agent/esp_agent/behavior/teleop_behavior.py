@@ -13,8 +13,8 @@ class TeleopBehavior(Behavior):
         self.drone_api = drone_api
         self.mediator_api = mediator_api
 
-    # def on_enter(self):
-    #     self.mediator_api.reset_states()
+    def on_enter(self):
+        self.mediator_api.set_teleop_signal(False)
 
     def execute(self):
         
@@ -30,4 +30,6 @@ class TeleopBehavior(Behavior):
             return "drop"
         if self.mediator_api.received_load_signal:
             return "load"
+        if self.mediator_api.received_hold_signal:
+            return "hold"
         return None
