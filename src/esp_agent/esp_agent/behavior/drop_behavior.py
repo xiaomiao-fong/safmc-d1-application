@@ -24,4 +24,6 @@ class DropBehavior(Behavior):
         pass
 
     def get_next_state(self) -> Optional[str]:
-        return "teleop"
+        if self.mediator_api.received_teleop_signal:
+            return "teleop"
+        return None
