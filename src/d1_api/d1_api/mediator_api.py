@@ -33,20 +33,20 @@ class MediatorApi(Api):
 
         # Subscribers
 
-        node.create_subscription(Bool, f"{self.__topic_prefix}/arm", self.set_arming_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/teleop", self.set_teleop_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/load", self.set_load_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/hold", self.set_hold_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/in/arm", self.set_arming_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/in/teleop", self.set_teleop_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/in/load", self.set_load_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/in/hold", self.set_hold_signal, qos_profile)
 
         # TODO mediator outgoing msg
-        node.create_subscription(Bool, f"{self.__topic_prefix}/drop", self.set_drop_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/track", self.set_track_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/in/drop", self.set_drop_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/in/track", self.set_track_signal, qos_profile)
 
         #Publishers
 
-        self.arm_ready_pub = node.create_publisher(UInt32, f"/mediator/arm_ready", qos_profile)
-        self.status_pub = node.create_publisher(AgentStatus, '/mediator/status', qos_profile)
-        self.loaded_pub = node.create_publisher(UInt32, '/mediator/loaded', qos_profile)
+        self.arm_ready_pub = node.create_publisher(UInt32, f"{self.__topic_prefix}/out/arm_ready", qos_profile)
+        self.status_pub = node.create_publisher(AgentStatus, f'{self.__topic_prefix}/out/status', qos_profile)
+        self.loaded_pub = node.create_publisher(UInt32, f'{self.__topic_prefix}/out/loaded', qos_profile)
 
 
     ### Properties ###
