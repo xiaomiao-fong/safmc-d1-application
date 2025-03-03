@@ -21,6 +21,7 @@ class MediatorApi(Api):
         self.__arming_signal : bool = False
         self.__teleop_signal : bool = False
         self.__load_signal : bool = False
+        self.__hold_signal : bool = False
         self.__drop_signal : bool = False
 
         qos_profile = QoSProfile(
@@ -32,13 +33,14 @@ class MediatorApi(Api):
 
         # Subscribers
 
-        node.create_subscription(Bool, f"{self.__topic_prefix}/arm", self.__set_arming_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/teleop", self.__set_teleop_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/load", self.__set_load_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/arm", self.set_arming_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/teleop", self.set_teleop_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/load", self.set_load_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/hold", self.set_hold_signal, qos_profile)
 
         # TODO mediator outgoing msg
-        node.create_subscription(Bool, f"{self.__topic_prefix}/drop", self.__set_drop_signal, qos_profile)
-        node.create_subscription(Bool, f"{self.__topic_prefix}/track", self.__set_track_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/drop", self.set_drop_signal, qos_profile)
+        node.create_subscription(Bool, f"{self.__topic_prefix}/track", self.set_track_signal, qos_profile)
 
         #Publishers
 
@@ -59,6 +61,9 @@ class MediatorApi(Api):
     def received_load_signal(self) -> bool:
         return self.__load_signal
     @property
+    def received_hold_signal(self) -> bool:
+        return self.__hold_signal
+    @property
     def received_drop_signal(self) -> bool:
         return self.__drop_signal
     @property
@@ -67,20 +72,23 @@ class MediatorApi(Api):
         
     ### Setters ###
 
-    def __set_arming_signal(self, msg : Bool) -> None:
-        self.__arming_signal = msg.data
+    def set_arming_signal(self, msg : Bool) -> None:
+        self.__arming_signal = msg.data if isinstance(msg, Bool) else msg
 
-    def __set_teleop_signal(self, msg : Bool) -> None:
-        self.__teleop_signal = msg.data
+    def set_teleop_signal(self, msg : Bool) -> None:
+        self.__teleop_signal = msg.data if isinstance(msg, Bool) else msg
 
-    def __set_load_signal(self, msg : Bool) -> None:
-        self.__load_signal = msg.data
+    def set_load_signal(self, msg : Bool) -> None:
+        self.__load_signal = msg.data if isinstance(msg, Bool) else msg
 
-    def __set_drop_signal(self, msg : Bool) -> None:
-        self.__drop_signal = msg.data
+    def set_hold_signal(self, msg : Bool) -> None:
+        self.__hold_signal = msg.data if isinstance(msg, Bool) else msg
+
+    def set_drop_signal(self, msg : Bool) -> None:
+        self.__drop_signal = msg.data if isinstance(msg, Bool) else msg
     
-    def __set_track_signal(self, msg : Bool) -> None:
-        self.__track_signal = msg.data
+    def set_track_signal(self, msg : Bool) -> None:
+        self.__track_signal = msg.data if isinstance(msg, Bool) else msg
 
     def __get_drone_id_msg(self) -> UInt32:
         uint32_msg = UInt32()

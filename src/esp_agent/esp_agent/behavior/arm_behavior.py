@@ -12,6 +12,9 @@ class ArmBehavior(Behavior):
         self.drone_api = drone_api
         self.mediator_api = mediator_api
 
+    def on_enter(self):
+        self.mediator_api.set_arming_signal(False)
+
     def execute(self):
 
         if not self.drone_api.is_armed:

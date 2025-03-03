@@ -12,6 +12,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ESPCMD.msg"
   "msg/AgentStatus.msg"
+  "msg/Magnet.msg"
+  "msg/Payload.msg"
  )
 
 
